@@ -4,36 +4,29 @@ on:
   push:
     branches:
       - main
-  # 允许你在 GitHub 页面上随时点击按钮手动触发部署
-  workflow_dispatch:
+      - master
+  workflow_dispatch: # 允许在 GitHub 界面手动点击按钮触发
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      # 1. 直接拉取源项目的代码到当前运行环境
+      # 1. 拉取源仓库代码（自动拉取源仓库的默认分支）
       - name: Checkout Source Repository
         uses: actions/checkout@v4
         with:
           repository: '1345695/edcloudwasm'
-          ref: 'main' # 如果源项目的默认分支是 master，请改成 master
 
-      # 2. 设置 Node.js 环境
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      # 2. 如果项目有 package.json 才执行安装，没有就自动跳过，防止报错
+      - name: Install Dependencies if package.json exists
+        run: |
+          if [ -f "package.json" ]; then
+            npm install
+          else
+            echo "No package.json found, skipping npm install."
+          fi
 
-      # 3. 安装源项目的依赖
-      - name: Install Dependencies
-        run: npm ci || npm install
-
-      # 4. 构建项目（如果源项目有 build 步骤）
-      - name: Build Project
-        run: npm run build
-        continue-on-error: true
-
-      # 5. 使用你存储在 Actions 里的 Secrets 部署到你的 Cloudflare
+      # 3. 使用 wrangler-action 自动打包并部署
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
