@@ -1,4 +1,4 @@
-name: 部署zj代码到workers.yml
+name: 部署zj代码到Workers
 on:
   workflow_dispatch:
 jobs:
