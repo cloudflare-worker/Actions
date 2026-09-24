@@ -23,7 +23,13 @@ jobs:
         with:
           node-version: 20
 
-      # 3. 安装依赖并尝试构建（Wasm / JS Worker 项目必备）
+      # 3. 【关键步骤】删除 wrangler.toml 中免费版不支持的 cpu_ms 和 limits 配置
+      - name: Fix wrangler.toml for Cloudflare Free Plan
+        run: |
+          sed -i '/cpu_ms/d' wrangler.toml
+          sed -i '/\[limits\]/d' wrangler.toml
+
+      # 4. 安装依赖并尝试构建
       - name: Install and Build
         run: |
           if [ -f "package.json" ]; then
@@ -31,11 +37,9 @@ jobs:
             npm run build --if-present
           fi
 
-      # 4. 执行 Cloudflare 部署（开启 DEBUG 日志打印详细错误）
+      # 5. 执行 Cloudflare 部署
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        env:
-          CLOUDFLARE_LOG: debug
