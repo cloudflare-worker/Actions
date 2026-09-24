@@ -5,14 +5,11 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - name: 拉取远程源码
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           repository: '1345695/edcloudwasm'
-      - name: 修改配置文件
-        run: sed -i '/cpu_ms/d; /\[limits\]/d' wrangler.toml
-      - name: 部署至 Cloudflare Workers
-        uses: cloudflare/wrangler-action@v3
+      - run: sed -i '/cpu_ms/d; /\[limits\]/d' wrangler.toml
+      - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
